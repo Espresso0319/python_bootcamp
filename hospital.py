@@ -89,12 +89,40 @@ class DatabaseConnector:
                 print(f"Error fetching hospital details: {error}")
                 return None
 
+    def get_doctors_by_salary_and_specialty(self, salary, specialty):
+        if self.connection:
+            try:
+                cursor = self.connection.cursor()
+                cursor.execute(
+                    "SELECT * FROM doctor WHERE salary > %s AND speciality = %s;", 
+                    (salary, specialty)
+                )
+                doctors = cursor.fetchall()
+                cursor.close()
+                if doctors:
+                    for doctor in doctors:
+                        print(f"Salary Doctor: {doctor}")
+                else:
+                    print(f"No doctors found with salary higher than {salary} and specialty {specialty}")
+                return doctors
+            except OperationalError as error:
+                print(f"Error fetching doctors: {error}")
+                return None
+
 # Usage example
 if __name__ == "__main__":
     db_connector = DatabaseConnector()
+    # Q1
     db_connector.get_version()
+    # Q2
     doctor_id = '101'
     hospital_id = '1'
     db_connector.get_doctor_details(doctor_id)
     db_connector.get_hospital_details(hospital_id)
+    # Q3
+    min_salary = 30000  
+    specialty = 'Garnacologist' 
+    db_connector.get_doctors_by_salary_and_specialty(min_salary, specialty)
+
+
     db_connector.close_connection()
