@@ -134,6 +134,20 @@ class DatabaseConnector:
                 print(f"Error fetching doctors: {error}")
                 return None
 
+    def update_doctor_experience(self, doctor_id, experience_years):
+        if self.connection:
+            try:
+                cursor = self.connection.cursor()
+                cursor.execute(
+                    "UPDATE doctor SET experience = %s WHERE doctor_id = %s;", 
+                    (experience_years, doctor_id)
+                )
+                self.connection.commit()
+                cursor.close()
+                print(f"Q5 Updated experience for doctor ID: {doctor_id} to {experience_years} years")
+            except psycopg2.OperationalError as error:
+                print(f"Error updating doctor experience: {error}")
+
 # Usage example
 if __name__ == "__main__":
     db_connector = DatabaseConnector()
@@ -150,5 +164,7 @@ if __name__ == "__main__":
     db_connector.get_doctors_by_salary_and_specialty(min_salary, specialty)
     # Q4
     db_connector.get_doctors_by_hospital_id(hospital_id)
+    # Q5
+    db_connector.update_doctor_experience(doctor_id, 10)
 
     db_connector.close_connection()
