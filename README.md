@@ -7,8 +7,8 @@ Require Python 3.10+
 ```bash
 python -m venv ./venv
 source ./venv/bin/activate
-pip3 install --user pipenv
-python3 -m pipenv shell
+# pip3 install --user pipenv
+# python3 -m pipenv shell
 pip install -r requirements.txt
 ```
 
