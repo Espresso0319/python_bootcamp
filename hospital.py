@@ -3,7 +3,7 @@ import os
 import psycopg2
 import datetime
 from dateutil.relativedelta import relativedelta
-  
+
 # Load the environment variables from the .env file  
 load_dotenv()
 
@@ -36,7 +36,7 @@ class DatabaseConnector:
                                           database=DB_database)
             print("Database connection successful")
             return connection
-        except OperationalError as error:
+        except psycopg2.OperationalError as error:
             print(f"Error connecting to the database: {error}")
             return None
 
@@ -48,7 +48,7 @@ class DatabaseConnector:
                 db_version = cursor.fetchone()
                 print(f"Database version: {db_version[0]}")
                 cursor.close()
-            except OperationalError as error:
+            except psycopg2.OperationalError as error:
                 print(f"Error fetching database version: {error}")
 
     def close_connection(self):
@@ -69,7 +69,7 @@ class DatabaseConnector:
                 else:
                     print(f"No doctor found with ID: {doctor_id}")
                 return doctor_details
-            except OperationalError as error:
+            except psycopg2.OperationalError as error:
                 print(f"Error fetching doctor details: {error}")
                 return None
 
@@ -85,7 +85,7 @@ class DatabaseConnector:
                 else:
                     print(f"No hospital found with ID: {hospital_id}")
                 return hospital_details
-            except OperationalError as error:
+            except psycopg2.OperationalError as error:
                 print(f"Error fetching hospital details: {error}")
                 return None
 
@@ -101,11 +101,36 @@ class DatabaseConnector:
                 cursor.close()
                 if doctors:
                     for doctor in doctors:
-                        print(f"Salary Doctor: {doctor}")
+                        print(f"Q3 Doctor: {doctor}")
                 else:
                     print(f"No doctors found with salary higher than {salary} and specialty {specialty}")
                 return doctors
-            except OperationalError as error:
+            except psycopg2.OperationalError as error:
+                print(f"Error fetching doctors: {error}")
+                return None
+
+    def get_doctors_by_hospital_id(self, hospital_id):
+        if self.connection:
+            try:
+                cursor = self.connection.cursor()
+                cursor.execute(
+                    """
+                    SELECT d.*, h.hospital_name 
+                    FROM doctor d
+                    JOIN hospital h ON d.hospital_id = h.hospital_id
+                    WHERE d.hospital_id = %s;
+                    """, 
+                    (hospital_id,)
+                )
+                doctors = cursor.fetchall()
+                cursor.close()
+                if doctors:
+                    for doctor in doctors:
+                        print(f"Q4 Doctor: {doctor}")
+                else:
+                    print(f"No doctors found for hospital ID: {hospital_id}")
+                return doctors
+            except psycopg2.OperationalError as error:
                 print(f"Error fetching doctors: {error}")
                 return None
 
@@ -123,6 +148,7 @@ if __name__ == "__main__":
     min_salary = 30000  
     specialty = 'Garnacologist' 
     db_connector.get_doctors_by_salary_and_specialty(min_salary, specialty)
-
+    # Q4
+    db_connector.get_doctors_by_hospital_id(hospital_id)
 
     db_connector.close_connection()
