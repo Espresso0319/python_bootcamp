@@ -8,7 +8,6 @@ from dateutil.relativedelta import relativedelta
 load_dotenv()
 
 # Get the environment variables
-
 DB_user = os.getenv('DB_USER')
 DB_password = os.getenv('DB_PASSWORD')
 DB_host = os.getenv('DB_HOST')
@@ -58,9 +57,44 @@ class DatabaseConnector:
             self.connection = None
             print("Database connection closed")
 
+    def get_doctor_details(self, doctor_id):
+        if self.connection:
+            try:
+                cursor = self.connection.cursor()
+                cursor.execute("SELECT * FROM doctor WHERE doctor_id = %s;", (doctor_id,))
+                doctor_details = cursor.fetchone()
+                cursor.close()
+                if doctor_details:
+                    print(f"Doctor Details: {doctor_details}")
+                else:
+                    print(f"No doctor found with ID: {doctor_id}")
+                return doctor_details
+            except OperationalError as error:
+                print(f"Error fetching doctor details: {error}")
+                return None
+
+    def get_hospital_details(self, hospital_id):
+        if self.connection:
+            try:
+                cursor = self.connection.cursor()
+                cursor.execute("SELECT * FROM hospital WHERE hospital_id = %s;", (hospital_id,))
+                hospital_details = cursor.fetchone()
+                cursor.close()
+                if hospital_details:
+                    print(f"Hospital Details: {hospital_details}")
+                else:
+                    print(f"No hospital found with ID: {hospital_id}")
+                return hospital_details
+            except OperationalError as error:
+                print(f"Error fetching hospital details: {error}")
+                return None
+
 # Usage example
 if __name__ == "__main__":
     db_connector = DatabaseConnector()
     db_connector.get_version()
+    doctor_id = '101'
+    hospital_id = '1'
+    db_connector.get_doctor_details(doctor_id)
+    db_connector.get_hospital_details(hospital_id)
     db_connector.close_connection()
-
