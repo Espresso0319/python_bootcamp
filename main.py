@@ -15,7 +15,7 @@ from fastapi_and_logging import FastAPIIncomingLog
 models.Base.metadata.create_all(bind=engine)
 
 
-# lifespan funciton
+# lifespan function
 def fake_answer_to_everything_ml_model(x: float):
     return x * 42
 
