@@ -67,38 +67,7 @@ def get_settings():
     return Settings()
 
 
-@app.get("/")
-def index():
-    return "ok"
 
-
-@app.get("/no-type-hints/{query}", tags=["test"])
-def no_type_hints(q, p=None):
-    return {"q": q, "p": p}
-
-
-@app.get("/header-test", tags=["test"])
-def header_test(user_agent: Annotated[str | None, Header()] = None, x_token: Annotated[str, Header()] = None):
-    return {"user_agent": user_agent, "x_token": x_token}
-
-
-@app.get("/cookie-test", tags=["test", "cookie"])
-def cookie_test(session_id: Annotated[str | None, Cookie()] = None, expires: Annotated[str | None, Cookie()] = None):
-    return {"session_id": session_id, "Expires": expires}
-
-
-@app.get("/full-req-obj", tags=["test"])
-def full_req_obj_test(request: Request):
-    return {"headers": request.headers, "cookies": request.cookies}
-
-
-@app.get("/info", tags=["test"])
-def get_info(settings: Annotated[Settings, Depends(get_settings)]):
-    return {
-        "app_name": settings.app_name,
-        "admin_email": settings.admin_email,
-        "items_per_user": settings.items_per_user,
-    }
 
 
 if __name__ == "__main__":
