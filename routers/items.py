@@ -1,8 +1,5 @@
 from typing import Annotated, List
-from fastapi import APIRouter, Body, Depends
-from data_types import Item, User
-
-
+from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.orm import Session
 import crud
 import schemas
@@ -21,26 +18,28 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("")
-def get_items(skip: int = 0, limit: int = 10):
-    return {"message": "Get all items", "skip": skip, "limit": limit}
+@router.get("", response_model=List[schemas.Item])
+def get_items(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    items = crud.get_items(db, skip=skip, limit=limit)
+    return items
 
 
-@router.get("/{item_id}")
-def get_item(item_id: int):
-    return {"message": f"Get item with id {item_id}"}
+@router.post("/", response_model=schemas.Item)
+def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    return crud.create_user_item(db=db, item=item, user_id=1)
 
 
-@router.post("/")
-def create_blog(item: schemas.ItemBase, db: Session = Depends(get_db)):
-    return crud.create_user_item(db=db, item=item, user_id='1')
+@router.put("/{item_id}", response_model=schemas.Item)
+def update_item(item_id: int, updated_item: Annotated[schemas.ItemCreate, Body(embed=True)], db: Session = Depends(get_db)):
+    item = crud.update_item(db=db, item_id=item_id, item_update=updated_item)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
 
 
-@router.put("/{item_id}")
-def update_item(item_id: int, updated_item: Annotated[Item, Body(embed=True)] = None):
-    return {"message": f"Updated item with id {item_id}", "updated": updated_item}
-
-
-@router.delete("/{item_id}")
-def delete_items(item_id: int):
+@router.delete("/{item_id}", response_model=dict)
+def delete_items(item_id: int, db: Session = Depends(get_db)):
+    result = crud.delete_item(db=db, item_id=item_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Item not found")
     return {"message": f"Deleted item with id {item_id}"}
