@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from functools import lru_cache
 from typing import Annotated
 
 import uvicorn
@@ -61,10 +60,7 @@ async def shutdown_event():
 # ---- deprecated event end ----
 
 
-# settings
-@lru_cache
-def get_settings():
-    return Settings()
+
 
 
 if __name__ == "__main__":
