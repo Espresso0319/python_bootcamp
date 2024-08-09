@@ -14,9 +14,10 @@ from pydantic import (
 
 
 class Item(BaseModel):
-    name: str
-    price: float = 10.0
-    on_stack: Optional[Union[int, float]] = None
+    id: Optional[UUID4] = None
+    title: str = ""
+    description: str = ""
+    owner_id: Optional[UUID4] = None
 
 
 class User(BaseModel):

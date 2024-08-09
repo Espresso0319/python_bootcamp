@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-
+from sqlalchemy.exc import NoResultFound
 import models
 import schemas
 from routers.auth_users import get_password_hash
@@ -36,3 +36,30 @@ def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def list_items(db: Session, user_id: int, skip: int = 0, limit: int = 100):    
+    return db.query(models.Item).filter(models.Item.owner_id == user_id).offset(skip).limit(limit).all()
+
+
+def update_item(db: Session, item_id: int, item_update: schemas.ItemCreate):    
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise NoResultFound(f"Item with id {item_id} does not exist")
+    
+    for key, value in item_update.dict(exclude_unset=True).items():
+        setattr(item, key, value)
+
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+def delete_item(db: Session, item_id: int):
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise NoResultFound(f"Item with id {item_id} does not exist")
+
+    db.delete(item)
+    db.commit()
+    return {"msg": f"Item with id {item_id} was deleted"}

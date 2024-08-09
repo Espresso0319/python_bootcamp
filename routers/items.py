@@ -1,16 +1,26 @@
 from typing import Annotated, List
-
 from fastapi import APIRouter, Body, Depends
-
 from data_types import Item, User
-from dependencies import get_token_header
+
+
+from sqlalchemy.orm import Session
+import crud
+import schemas
+from database import SessionLocal
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 router = APIRouter(
     prefix="/items",
-    tags=["Blogs"],
-    dependencies=[Depends(get_token_header)],
+    tags=["Blogs"],    
     responses={404: {"description": "Not found"}},
 )
+
 @router.get("")
 def get_items(skip: int = 0, limit: int = 10):
     return {"message": "Get all items", "skip": skip, "limit": limit}
@@ -22,8 +32,8 @@ def get_item(item_id: int):
 
 
 @router.post("/")
-def create_items(items: List[Item]):
-    return {"message": "create items", "items": items}
+def create_blog(item: schemas.ItemBase, db: Session = Depends(get_db)):
+    return crud.create_user_item(db=db, item=item, user_id='1')
 
 
 @router.put("/{item_id}")
