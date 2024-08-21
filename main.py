@@ -1,18 +1,14 @@
+import uvicorn
+from fastapi import Depends, FastAPI
 from contextlib import asynccontextmanager
 from typing import Annotated
-
-import uvicorn
-from fastapi import Cookie, Depends, FastAPI, Header, Request
-
 import models
-from config import Settings
 from database import engine
 from dependencies import get_query_token
 from routers import items, users, auth_users
 from fastapi_and_logging import FastAPIIncomingLog
 
 models.Base.metadata.create_all(bind=engine)
-
 
 # lifespan function
 def fake_answer_to_everything_ml_model(x: float):
@@ -41,26 +37,6 @@ abc = app
 app.include_router(items.router)
 app.include_router(users.router)
 app.include_router(auth_users.router)
-
-# --- deprecated event start ----
-cache = {}
-
-
-@app.on_event("startup")
-async def startup_event():
-    cache["foo"] = {"name": "Fighters"}
-    cache["bar"] = {"name": "Tenders"}
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    cache.clear()
-
-
-# ---- deprecated event end ----
-
-
-
 
 
 if __name__ == "__main__":
